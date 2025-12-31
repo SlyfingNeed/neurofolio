@@ -63,7 +63,7 @@ export default function HeroSection() {
               transition={{ delay: 0.3 }}
               className="text-6xl md:text-7xl font-bold text-white leading-tight"
             >
-              John Doe
+              Seva Jaya Satriya
             </motion.h1>
 
             <motion.div

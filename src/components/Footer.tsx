@@ -101,7 +101,7 @@ export default function Footer() {
             viewport={{ once: true }}
             className="text-gray-500 text-sm"
           >
-            © {currentYear} John Doe. All rights reserved.
+            © {currentYear} Seva Jaya Satriya. All rights reserved.
           </motion.p>
         </div>
       </div>

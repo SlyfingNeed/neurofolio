@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback, useMemo } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Node {
@@ -59,16 +59,18 @@ export default function NeuralNetwork({ activeIndex }: NeuralNetworkProps) {
   // Create network structure
   useEffect(() => {
     const { width, height } = dimensions;
-    const layers = [4, 6, 8, 6, 4]; // Neurons per layer
-    const layerSpacing = width / (layers.length + 1);
+    const layers = [3, 4, 6, 4, 3];
+    const horizontalPadding = width * 0.08;
+    const usableWidth = width - (horizontalPadding * 2);
+    const layerSpacing = usableWidth / (layers.length - 1);
     const newNodes: Node[] = [];
 
     layers.forEach((neuronCount, layerIndex) => {
       const verticalSpacing = height / (neuronCount + 1);
       for (let i = 0; i < neuronCount; i++) {
-        const isBlue = Math.random() > 0.6; // 40% chance of being blue
+        const isBlue = Math.random() > 0.6;
         newNodes.push({
-          x: layerSpacing * (layerIndex + 1),
+          x: horizontalPadding + (layerSpacing * layerIndex),
           y: verticalSpacing * (i + 1),
           layer: layerIndex,
           index: newNodes.length,
@@ -256,18 +258,25 @@ export default function NeuralNetwork({ activeIndex }: NeuralNetworkProps) {
   );
 }
 
-// Separate component to handle particles with stable random values
+// Separate component to handle particles - only renders on client to avoid hydration mismatch
 function FloatingParticles({ dimensions }: { dimensions: { width: number; height: number } }) {
-  const particles = useMemo(() => {
-    return Array.from({ length: 15 }, (_, i) => ({
-      id: i,
-      initialX: Math.random() * 500,
-      initialY: Math.random() * 600,
-      animateX: Math.random() * 500,
-      animateY: Math.random() * 600,
-      duration: Math.random() * 10 + 10,
-    }));
+  const [particles, setParticles] = useState<Particle[]>([]);
+
+  // Generate particles only on client side to avoid hydration mismatch
+  useEffect(() => {
+    setParticles(
+      Array.from({ length: 15 }, (_, i) => ({
+        id: i,
+        initialX: Math.random() * 500,
+        initialY: Math.random() * 600,
+        animateX: Math.random() * 500,
+        animateY: Math.random() * 600,
+        duration: Math.random() * 10 + 10,
+      }))
+    );
   }, []);
+
+  if (particles.length === 0) return null;
 
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">

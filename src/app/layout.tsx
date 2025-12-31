@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "John Doe | Portfolio",
+  title: "Seva Jaya Satriya | Portfolio",
   description: "Machine Learning Engineer & Full Stack Developer Portfolio",
 };
 
