@@ -2,10 +2,26 @@
 
 import { motion } from "framer-motion";
 import { useState } from "react";
+import Image from "next/image";
+
+// Tech icon URLs from techicons.dev (hosted on icon.icepanel.io)
+const TechIconUrls: Record<string, string> = {
+  Python: "https://icon.icepanel.io/Technology/svg/Python.svg",
+  TypeScript: "https://icon.icepanel.io/Technology/svg/TypeScript.svg",
+  JavaScript: "https://icon.icepanel.io/Technology/svg/JavaScript.svg",
+  React: "https://icon.icepanel.io/Technology/svg/React.svg",
+  "Next.js": "https://icon.icepanel.io/Technology/svg/Next.js.svg",
+  TailwindCSS: "https://icon.icepanel.io/Technology/svg/Tailwind-CSS.svg",
+  "Node.js": "https://icon.icepanel.io/Technology/svg/Node.js.svg",
+  FastAPI: "https://icon.icepanel.io/Technology/svg/FastAPI.svg",
+  PostgreSQL: "https://icon.icepanel.io/Technology/svg/PostgresSQL.svg",
+  TensorFlow: "https://icon.icepanel.io/Technology/svg/TensorFlow.svg",
+  PyTorch: "https://icon.icepanel.io/Technology/svg/PyTorch.svg",
+  Docker: "https://icon.icepanel.io/Technology/svg/Docker.svg",
+};
 
 interface TechItem {
   name: string;
-  icon: string;
   category: string;
   level: number;
 }
@@ -19,18 +35,18 @@ interface ExperienceItem {
 }
 
 const techStack: TechItem[] = [
-  { name: "Python", icon: "🐍", category: "Languages", level: 95 },
-  { name: "TypeScript", icon: "📘", category: "Languages", level: 90 },
-  { name: "JavaScript", icon: "💛", category: "Languages", level: 92 },
-  { name: "React", icon: "⚛️", category: "Frontend", level: 90 },
-  { name: "Next.js", icon: "▲", category: "Frontend", level: 88 },
-  { name: "TailwindCSS", icon: "🎨", category: "Frontend", level: 92 },
-  { name: "Node.js", icon: "💚", category: "Backend", level: 85 },
-  { name: "FastAPI", icon: "⚡", category: "Backend", level: 88 },
-  { name: "PostgreSQL", icon: "🐘", category: "Database", level: 82 },
-  { name: "TensorFlow", icon: "🧠", category: "ML/AI", level: 90 },
-  { name: "PyTorch", icon: "🔥", category: "ML/AI", level: 88 },
-  { name: "Docker", icon: "🐳", category: "DevOps", level: 80 },
+  { name: "Python", category: "Languages", level: 95 },
+  { name: "TypeScript", category: "Languages", level: 90 },
+  { name: "JavaScript", category: "Languages", level: 92 },
+  { name: "React", category: "Frontend", level: 90 },
+  { name: "Next.js", category: "Frontend", level: 88 },
+  { name: "TailwindCSS", category: "Frontend", level: 92 },
+  { name: "Node.js", category: "Backend", level: 85 },
+  { name: "FastAPI", category: "Backend", level: 88 },
+  { name: "PostgreSQL", category: "Database", level: 82 },
+  { name: "TensorFlow", category: "ML/AI", level: 90 },
+  { name: "PyTorch", category: "ML/AI", level: 88 },
+  { name: "Docker", category: "DevOps", level: 80 },
 ];
 
 const experiences: ExperienceItem[] = [
@@ -155,18 +171,16 @@ export default function TechStackSection() {
                   whileHover={{ scale: 1.05, y: -5 }}
                   className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-xl p-4 hover:border-blue-500/50 transition-all duration-300"
                 >
-                  <div className="text-2xl mb-2">{tech.icon}</div>
-                  <h4 className="text-white font-medium mb-2">{tech.name}</h4>
-                  <div className="w-full bg-gray-700 rounded-full h-1.5">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      whileInView={{ width: `${tech.level}%` }}
-                      transition={{ duration: 1, delay: 0.2 }}
-                      viewport={{ once: true }}
-                      className="h-1.5 rounded-full bg-linear-to-r from-blue-500 to-blue-400"
+                  <div className="mb-2">
+                    <Image
+                      src={TechIconUrls[tech.name]}
+                      alt={tech.name}
+                      width={32}
+                      height={32}
+                      className="w-8 h-8"
                     />
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">{tech.level}%</p>
+                  <h4 className="text-white font-medium">{tech.name}</h4>
                 </motion.div>
               ))}
             </motion.div>
