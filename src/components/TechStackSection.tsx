@@ -3,8 +3,24 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 import Image from "next/image";
+import StackIcon from "tech-stack-icons";
 
-// Tech icon URLs from techicons.dev (hosted on icon.icepanel.io)
+// Mapping for tech-stack-icons package (only icons that exist in the package)
+const TechStackIconNames: Record<string, string> = {
+  Python: "python",
+  TypeScript: "typescript",
+  JavaScript: "js",
+  Rust: "rust",
+  "Next.js": "nextjs2",
+  TailwindCSS: "tailwindcss",
+  "Node.js": "nodejs",
+  PostgreSQL: "postgresql",
+  PyTorch: "pytorch",
+  Docker: "docker",
+  Kubernetes: "kubernetes",
+};
+
+// Fallback URLs from techicons.dev (hosted on icon.icepanel.io)
 const TechIconUrls: Record<string, string> = {
   Python: "https://icon.icepanel.io/Technology/svg/Python.svg",
   TypeScript: "https://icon.icepanel.io/Technology/svg/TypeScript.svg",
@@ -18,7 +34,42 @@ const TechIconUrls: Record<string, string> = {
   TensorFlow: "https://icon.icepanel.io/Technology/svg/TensorFlow.svg",
   PyTorch: "https://icon.icepanel.io/Technology/svg/PyTorch.svg",
   Docker: "https://icon.icepanel.io/Technology/svg/Docker.svg",
+  Kubernetes: "https://icon.icepanel.io/Technology/svg/Kubernetes.svg",
+  "Google Cloud": "https://icon.icepanel.io/Technology/svg/Google-Cloud.svg",
+  Rust: "https://icon.icepanel.io/Technology/svg/Rust.svg",
 };
+
+// Set to true to use tech-stack-icons package, false to use URL-based icons
+const USE_TECH_STACK_ICONS = true;
+
+// Icon component that supports both sources
+function TechIcon({ name }: { name: string }) {
+  const stackIconName = TechStackIconNames[name];
+  const iconUrl = TechIconUrls[name];
+
+  if (USE_TECH_STACK_ICONS && stackIconName) {
+    return <StackIcon name={stackIconName} className="w-8 h-8" />;
+  }
+
+  if (iconUrl) {
+    return (
+      <Image
+        src={iconUrl}
+        alt={name}
+        width={32}
+        height={32}
+        className="w-8 h-8"
+      />
+    );
+  }
+
+  // Fallback to first letter if no icon found
+  return (
+    <div className="w-8 h-8 bg-gray-700 rounded flex items-center justify-center text-white font-bold">
+      {name.charAt(0)}
+    </div>
+  );
+}
 
 interface TechItem {
   name: string;
@@ -38,6 +89,7 @@ const techStack: TechItem[] = [
   { name: "Python", category: "Languages", level: 95 },
   { name: "TypeScript", category: "Languages", level: 90 },
   { name: "JavaScript", category: "Languages", level: 92 },
+  { name: "Rust", category: "Languages", level: 75 },
   { name: "React", category: "Frontend", level: 90 },
   { name: "Next.js", category: "Frontend", level: 88 },
   { name: "TailwindCSS", category: "Frontend", level: 92 },
@@ -46,41 +98,44 @@ const techStack: TechItem[] = [
   { name: "PostgreSQL", category: "Database", level: 82 },
   { name: "TensorFlow", category: "ML/AI", level: 90 },
   { name: "PyTorch", category: "ML/AI", level: 88 },
+  { name: "Scikit-learn", category: "ML/AI", level: 80 },
   { name: "Docker", category: "DevOps", level: 80 },
+  { name: "Kubernetes", category: "DevOps", level: 70 },
+  { name: "Google Cloud", category: "DevOps", level: 75 },
 ];
 
 const experiences: ExperienceItem[] = [
   {
+    year: "2023-Now",
+    title: "Freelance ML/AI Engineer",
+    company: "Freelance",
+    description:
+      "Freelancing in various platform from developing AI solution and ML Model to delivering production-ready end-to-end product.",
+    technologies: ["Python", "Scikit-learn", "Pytorch", "TensorFlow", "n8n", "Docker", "Google Cloud"],
+  },
+  {
+    year: "2025-Now",
+    title: "Research & Analyst",
+    company: "KSPM FV ITS",
+    description:
+      "Conducting research on machine learning algorithms and data analysis to support academic projects and publications in Indonesia equity stock market.",
+    technologies: ["Python", "Pandas", "NumPy", "Matplotlib"],
+  },
+  {
+    year: "2024-2025",
+    title: "Founder & Tech Lead",
+    company: "Prodigy",
+    description:
+      "Creating an AI-powered learning platform to provide personalized tutor experiences for SNBT university entrance exam for highschool student.",
+    technologies: ["React", "Next.js", "TailwindCSS", "Node.js", "Tensor Flow", "FastAPI", "PostgreSQL", "Docker"],
+  },
+  {
     year: "2024",
-    title: "Senior ML Engineer",
-    company: "TechCorp AI",
-    description:
-      "Leading the development of large-scale machine learning systems for real-time prediction and recommendation engines.",
-    technologies: ["Python", "TensorFlow", "Kubernetes", "AWS"],
-  },
-  {
-    year: "2022",
-    title: "Full Stack Developer",
-    company: "InnovateTech",
-    description:
-      "Built and maintained scalable web applications serving millions of users with React and Node.js.",
-    technologies: ["React", "Node.js", "PostgreSQL", "Redis"],
-  },
-  {
-    year: "2020",
-    title: "Junior Data Scientist",
-    company: "DataDriven Inc",
-    description:
-      "Developed predictive models and data pipelines for business intelligence and analytics solutions.",
-    technologies: ["Python", "Pandas", "Scikit-learn", "SQL"],
-  },
-  {
-    year: "2019",
     title: "Software Engineer Intern",
-    company: "StartupHub",
+    company: "Molca",
     description:
       "Contributed to frontend development and learned best practices in agile software development.",
-    technologies: ["JavaScript", "Vue.js", "Firebase"],
+    technologies: [ "Vue.Js", "TailwindCSS", "Firebase", "Git"],
   },
 ];
 
@@ -172,13 +227,7 @@ export default function TechStackSection() {
                   className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-xl p-4 hover:border-blue-500/50 transition-all duration-300"
                 >
                   <div className="mb-2">
-                    <Image
-                      src={TechIconUrls[tech.name]}
-                      alt={tech.name}
-                      width={32}
-                      height={32}
-                      className="w-8 h-8"
-                    />
+                    <TechIcon name={tech.name} />
                   </div>
                   <h4 className="text-white font-medium">{tech.name}</h4>
                 </motion.div>
