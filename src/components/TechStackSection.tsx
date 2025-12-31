@@ -85,7 +85,7 @@ export default function TechStackSection() {
       className="min-h-screen py-20 relative overflow-hidden"
     >
       {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black via-gray-900/50 to-black" />
+      <div className="absolute inset-0 bg-linear-to-b from-black via-gray-900/50 to-black" />
 
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         {/* Section Title */}
@@ -163,7 +163,7 @@ export default function TechStackSection() {
                       whileInView={{ width: `${tech.level}%` }}
                       transition={{ duration: 1, delay: 0.2 }}
                       viewport={{ once: true }}
-                      className="h-1.5 rounded-full bg-gradient-to-r from-blue-500 to-blue-400"
+                      className="h-1.5 rounded-full bg-linear-to-r from-blue-500 to-blue-400"
                     />
                   </div>
                   <p className="text-xs text-gray-500 mt-1">{tech.level}%</p>
@@ -186,7 +186,7 @@ export default function TechStackSection() {
 
             <div className="relative">
               {/* Timeline line */}
-              <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-500 via-blue-400 to-transparent" />
+              <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-linear-to-b from-blue-500 via-blue-400 to-transparent" />
 
               {/* Experience items */}
               <div className="space-y-8">

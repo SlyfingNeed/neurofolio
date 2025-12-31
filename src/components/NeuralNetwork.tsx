@@ -1,22 +1,23 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useRef, useState, useMemo } from "react";
+import { motion } from "framer-motion";
 
 interface Node {
   x: number;
   y: number;
   layer: number;
   index: number;
-  isActive: boolean;
-  glowIntensity: number;
   baseColor: "blue" | "white";
 }
 
 interface Connection {
-  from: Node;
-  to: Node;
-  isActive: boolean;
+  fromIndex: number;
+  toIndex: number;
+  fromX: number;
+  fromY: number;
+  toX: number;
+  toY: number;
 }
 
 interface NeuralNetworkProps {
@@ -33,14 +34,35 @@ interface Particle {
   duration: number;
 }
 
+// Seeded random number generator for consistent results
+function seededRandom(seed: number): number {
+  const x = Math.sin(seed * 9999) * 10000;
+  return x - Math.floor(x);
+}
+
+// Pre-generate static particle data
+const STATIC_PARTICLES: Particle[] = Array.from({ length: 12 }, (_, i) => ({
+  id: i,
+  initialX: seededRandom(i * 4) * 500,
+  initialY: seededRandom(i * 4 + 1) * 600,
+  animateX: seededRandom(i * 4 + 2) * 500,
+  animateY: seededRandom(i * 4 + 3) * 600,
+  duration: seededRandom(i * 5) * 10 + 15,
+}));
+
 export default function NeuralNetwork({ activeIndex }: NeuralNetworkProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [nodes, setNodes] = useState<Node[]>([]);
-  const [connections, setConnections] = useState<Connection[]>([]);
-  const [pulsingNodes, setPulsingNodes] = useState<Set<number>>(new Set());
   const [dimensions, setDimensions] = useState({ width: 500, height: 600 });
+  const [isClient, setIsClient] = useState(false);
+  const [pulsingNodes, setPulsingNodes] = useState<Set<number>>(new Set());
+  const animationSeedRef = useRef(0);
 
-  // Initialize the neural network structure
+  // Mark as client-side rendered
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // Initialize dimensions
   useEffect(() => {
     const updateDimensions = () => {
       if (containerRef.current) {
@@ -56,34 +78,34 @@ export default function NeuralNetwork({ activeIndex }: NeuralNetworkProps) {
     return () => window.removeEventListener("resize", updateDimensions);
   }, []);
 
-  // Create network structure
-  useEffect(() => {
+  // Memoize network structure - only recalculates when dimensions change
+  const { nodes, connections } = useMemo(() => {
     const { width, height } = dimensions;
     const layers = [3, 4, 6, 4, 3];
     const horizontalPadding = width * 0.08;
-    const usableWidth = width - (horizontalPadding * 2);
+    const usableWidth = width - horizontalPadding * 2;
     const layerSpacing = usableWidth / (layers.length - 1);
     const newNodes: Node[] = [];
 
+    let nodeCounter = 0;
     layers.forEach((neuronCount, layerIndex) => {
       const verticalSpacing = height / (neuronCount + 1);
       for (let i = 0; i < neuronCount; i++) {
-        const isBlue = Math.random() > 0.6;
+        const isBlue = seededRandom(layerIndex * 100 + i) > 0.6;
         newNodes.push({
-          x: horizontalPadding + (layerSpacing * layerIndex),
+          x: horizontalPadding + layerSpacing * layerIndex,
           y: verticalSpacing * (i + 1),
           layer: layerIndex,
-          index: newNodes.length,
-          isActive: false,
-          glowIntensity: 0,
+          index: nodeCounter++,
           baseColor: isBlue ? "blue" : "white",
         });
       }
     });
 
-    // Create connections between adjacent layers
+    // Create connections
     const newConnections: Connection[] = [];
     let nodeIndex = 0;
+    let connectionSeed = 0;
 
     for (let l = 0; l < layers.length - 1; l++) {
       const currentLayerStart = nodeIndex;
@@ -93,12 +115,14 @@ export default function NeuralNetwork({ activeIndex }: NeuralNetworkProps) {
 
       for (let i = currentLayerStart; i < currentLayerEnd; i++) {
         for (let j = nextLayerStart; j < nextLayerEnd; j++) {
-          // Only connect some nodes for visual clarity
-          if (Math.random() > 0.3) {
+          if (seededRandom(connectionSeed++) > 0.3) {
             newConnections.push({
-              from: newNodes[i],
-              to: newNodes[j],
-              isActive: false,
+              fromIndex: i,
+              toIndex: j,
+              fromX: newNodes[i].x,
+              fromY: newNodes[i].y,
+              toX: newNodes[j].x,
+              toY: newNodes[j].y,
             });
           }
         }
@@ -106,83 +130,78 @@ export default function NeuralNetwork({ activeIndex }: NeuralNetworkProps) {
       nodeIndex = currentLayerEnd;
     }
 
-    setNodes(newNodes);
-    setConnections(newConnections);
+    return { nodes: newNodes, connections: newConnections };
   }, [dimensions]);
 
-  // Propagate activation through the network based on typing
-  const propagateActivation = useCallback(() => {
-    if (nodes.length === 0) return;
+  // Single unified animation effect
+  useEffect(() => {
+    if (!isClient || nodes.length === 0) return;
 
-    // Calculate which layer should be active based on character index
-    const totalLayers = 5;
-    const activeLayer = Math.floor((activeIndex * totalLayers) / 20) % totalLayers;
+    const updatePulsingNodes = () => {
+      const totalLayers = 5;
+      const activeLayer = Math.floor((activeIndex * totalLayers) / 20) % totalLayers;
+      const seed = animationSeedRef.current++;
 
-    // Create ripple effect
-    const newPulsingNodes = new Set<number>();
-    
-    nodes.forEach((node, index) => {
-      if (node.layer === activeLayer || node.layer === activeLayer - 1 || node.layer === activeLayer + 1) {
-        if (Math.random() > 0.4) {
-          newPulsingNodes.add(index);
+      const newPulsing = new Set<number>();
+
+      // Add typing-based activation
+      nodes.forEach((node, index) => {
+        if (
+          node.layer === activeLayer ||
+          node.layer === activeLayer - 1 ||
+          node.layer === activeLayer + 1
+        ) {
+          if (seededRandom(activeIndex * 100 + index) > 0.4) {
+            newPulsing.add(index);
+          }
         }
-      }
-    });
-
-    setPulsingNodes(newPulsingNodes);
-  }, [activeIndex, nodes]);
-
-  useEffect(() => {
-    propagateActivation();
-  }, [propagateActivation]);
-
-  // Ambient animation effect
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const randomActivation = new Set<number>();
-      const numToActivate = Math.floor(Math.random() * 5) + 3;
-      
-      for (let i = 0; i < numToActivate; i++) {
-        randomActivation.add(Math.floor(Math.random() * nodes.length));
-      }
-      
-      setPulsingNodes((prev) => {
-        const combined = new Set([...prev, ...randomActivation]);
-        return combined;
       });
-    }, 300);
+
+      // Add ambient random activation
+      const numToActivate = 3 + Math.floor(seededRandom(seed) * 4);
+      for (let i = 0; i < numToActivate; i++) {
+        const nodeIdx = Math.floor(seededRandom(seed * 10 + i) * nodes.length);
+        newPulsing.add(nodeIdx);
+      }
+
+      setPulsingNodes(newPulsing);
+    };
+
+    // Initial update
+    updatePulsingNodes();
+
+    // Set up interval for ambient animation
+    const interval = setInterval(updatePulsingNodes, 500);
 
     return () => clearInterval(interval);
-  }, [nodes.length]);
+  }, [isClient, nodes, activeIndex]);
+
+  // Don't render until client-side
+  if (!isClient) {
+    return <div ref={containerRef} className="relative w-full h-full min-h-125" />;
+  }
 
   return (
-    <div ref={containerRef} className="relative w-full h-full min-h-[500px]">
+    <div ref={containerRef} className="relative w-full h-full min-h-125">
       <svg
         className="absolute inset-0 w-full h-full"
         viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}
         preserveAspectRatio="xMidYMid meet"
       >
-        {/* Connections */}
+        {/* Connections - using regular SVG for better performance */}
         <g className="connections">
           {connections.map((conn, index) => {
-            const fromActive = pulsingNodes.has(conn.from.index);
-            const toActive = pulsingNodes.has(conn.to.index);
-            const isActive = fromActive || toActive;
-
+            const isActive = pulsingNodes.has(conn.fromIndex) || pulsingNodes.has(conn.toIndex);
             return (
-              <motion.line
+              <line
                 key={index}
-                x1={conn.from.x}
-                y1={conn.from.y}
-                x2={conn.to.x}
-                y2={conn.to.y}
-                className={isActive ? "neural-line-active" : "neural-line"}
-                initial={{ opacity: 0.1 }}
-                animate={{
-                  opacity: isActive ? 0.6 : 0.15,
-                  strokeWidth: isActive ? 1.5 : 0.5,
-                }}
-                transition={{ duration: 0.3 }}
+                x1={conn.fromX}
+                y1={conn.fromY}
+                x2={conn.toX}
+                y2={conn.toY}
+                stroke={isActive ? "rgba(59, 130, 246, 0.6)" : "rgba(59, 130, 246, 0.15)"}
+                strokeWidth={isActive ? 1.5 : 0.5}
+                style={{ transition: "stroke 0.3s, stroke-width 0.3s" }}
               />
             );
           })}
@@ -190,51 +209,38 @@ export default function NeuralNetwork({ activeIndex }: NeuralNetworkProps) {
 
         {/* Nodes */}
         <g className="nodes">
-          {nodes.map((node, index) => {
-            const isActive = pulsingNodes.has(index);
+          {nodes.map((node) => {
+            const isActive = pulsingNodes.has(node.index);
             const isBlue = node.baseColor === "blue";
             const baseSize = isBlue ? 10 : 8;
-            const activeSize = baseSize + 4;
+            const currentSize = isActive ? baseSize + 4 : baseSize;
 
             return (
-              <g key={index}>
+              <g key={node.index}>
                 {/* Glow effect */}
-                <AnimatePresence>
-                  {isActive && (
-                    <motion.circle
-                      cx={node.x}
-                      cy={node.y}
-                      initial={{ r: baseSize, opacity: 0 }}
-                      animate={{ r: activeSize + 15, opacity: 0.3 }}
-                      exit={{ r: baseSize, opacity: 0 }}
-                      transition={{ duration: 0.5 }}
-                      fill={isBlue ? "#3b82f6" : "#ffffff"}
-                      filter="blur(8px)"
-                    />
-                  )}
-                </AnimatePresence>
+                {isActive && (
+                  <circle
+                    cx={node.x}
+                    cy={node.y}
+                    r={currentSize + 12}
+                    fill={isBlue ? "#3b82f6" : "#ffffff"}
+                    opacity={0.25}
+                    style={{ filter: "blur(8px)" }}
+                  />
+                )}
 
                 {/* Main node */}
-                <motion.circle
+                <circle
                   cx={node.x}
                   cy={node.y}
-                  r={isActive ? activeSize : baseSize}
+                  r={currentSize}
                   fill={isBlue ? "#3b82f6" : isActive ? "#ffffff" : "#888888"}
-                  initial={{ scale: 1 }}
-                  animate={{
-                    scale: isActive ? [1, 1.2, 1] : 1,
-                    filter: isActive
-                      ? `drop-shadow(0 0 ${isBlue ? "15px #3b82f6" : "10px #ffffff"})`
-                      : "none",
-                  }}
-                  transition={{
-                    duration: 0.5,
-                    repeat: isActive ? Infinity : 0,
-                    repeatType: "reverse",
-                  }}
                   style={{
+                    transition: "r 0.3s, fill 0.3s",
                     filter: isBlue
                       ? "drop-shadow(0 0 8px rgba(59, 130, 246, 0.5))"
+                      : isActive
+                      ? "drop-shadow(0 0 6px rgba(255, 255, 255, 0.5))"
                       : "none",
                   }}
                 />
@@ -258,40 +264,23 @@ export default function NeuralNetwork({ activeIndex }: NeuralNetworkProps) {
   );
 }
 
-// Separate component to handle particles - only renders on client to avoid hydration mismatch
-function FloatingParticles({ dimensions }: { dimensions: { width: number; height: number } }) {
-  const [particles, setParticles] = useState<Particle[]>([]);
-
-  // Generate particles only on client side to avoid hydration mismatch
-  useEffect(() => {
-    setParticles(
-      Array.from({ length: 15 }, (_, i) => ({
-        id: i,
-        initialX: Math.random() * 500,
-        initialY: Math.random() * 600,
-        animateX: Math.random() * 500,
-        animateY: Math.random() * 600,
-        duration: Math.random() * 10 + 10,
-      }))
-    );
-  }, []);
-
-  if (particles.length === 0) return null;
-
+// Memoized particles component
+const FloatingParticles = ({ dimensions }: { dimensions: { width: number; height: number } }) => {
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {particles.map((particle) => (
+      {STATIC_PARTICLES.map((particle) => (
         <motion.div
           key={particle.id}
-          className="absolute w-1 h-1 bg-blue-400 rounded-full opacity-30"
+          className="absolute w-1 h-1 bg-blue-400 rounded-full"
           initial={{
             x: (particle.initialX / 500) * dimensions.width,
             y: (particle.initialY / 600) * dimensions.height,
+            opacity: 0.1,
           }}
           animate={{
             x: (particle.animateX / 500) * dimensions.width,
             y: (particle.animateY / 600) * dimensions.height,
-            opacity: [0.1, 0.5, 0.1],
+            opacity: [0.1, 0.4, 0.1],
           }}
           transition={{
             duration: particle.duration,
@@ -302,4 +291,4 @@ function FloatingParticles({ dimensions }: { dimensions: { width: number; height
       ))}
     </div>
   );
-}
+};

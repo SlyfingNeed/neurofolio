@@ -92,7 +92,7 @@ export default function ProjectsSection() {
       className="min-h-screen py-20 relative overflow-hidden"
     >
       {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black via-gray-900/30 to-black" />
+      <div className="absolute inset-0 bg-linear-to-b from-black via-gray-900/30 to-black" />
 
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         {/* Section Title */}
@@ -129,7 +129,7 @@ export default function ProjectsSection() {
                 {/* Thumbnail */}
                 <div className="relative h-48 overflow-hidden">
                   <div
-                    className="absolute inset-0 bg-gradient-to-br from-blue-600/30 via-purple-600/20 to-cyan-600/30"
+                    className="absolute inset-0 bg-linear-to-br from-blue-600/30 via-purple-600/20 to-cyan-600/30"
                     style={{
                       backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%234299e1' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
                     }}
@@ -139,7 +139,7 @@ export default function ProjectsSection() {
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: hoveredProject === project.id ? 1 : 0 }}
-                    className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-center justify-center"
+                    className="absolute inset-0 bg-linear-to-t from-black/90 via-black/50 to-transparent flex items-center justify-center"
                   >
                     <div className="flex gap-4">
                       {project.link && (
