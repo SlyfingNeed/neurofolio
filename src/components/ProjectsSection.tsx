@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useState } from "react";
+import Image from "next/image";
 
 interface Project {
   id: number;
@@ -17,67 +18,67 @@ interface Project {
 const projects: Project[] = [
   {
     id: 1,
-    title: "Neural Vision AI",
-    caption: "Real-time object detection and tracking system",
+    title: "Agentic Web Scraper",
+    caption: "An advanced web scraping tool that utilizes autonomous agents to intelligently navigate and extract data from complex websites with dynamic content using Google Gemini, FastAPI, PlayWright.",
     description:
-      "An advanced computer vision system using deep learning for real-time object detection, tracking, and classification with 98% accuracy.",
+      ".",
     thumbnail: "/projects/neural-vision.jpg",
-    technologies: ["Python", "TensorFlow", "OpenCV", "CUDA"],
-    link: "#",
-    github: "#",
+    technologies: ["Python", "FastAPI", "RestAPI","PlayWright"],
+    link: "https://github.com/SlyfingNeed/Agentic-Web-Scraper",
+    github: "https://github.com/SlyfingNeed/Agentic-Web-Scraper",
   },
   {
     id: 2,
-    title: "Smart Analytics Dashboard",
-    caption: "Business intelligence platform with ML insights",
+    title: "Regime-adaptive Mean Reversion Transformer Portfolio Model",
+    caption: "Predictive stock portfolio modeling using Transformer architecture with volatility regime adaptation and mean reversion. ",
     description:
-      "A comprehensive analytics platform that processes large datasets and provides actionable insights using machine learning algorithms.",
+      "A comprehensive transformer model investment strategy.",
     thumbnail: "/projects/analytics.jpg",
-    technologies: ["React", "Node.js", "Python", "PostgreSQL"],
-    link: "#",
-    github: "#",
+    technologies: ["Python", "Scikit-learn", "Tensorflow"],
+    link: "https://github.com/SlyfingNeed/transformer-mr-model",
+    github: "https://github.com/SlyfingNeed/transformer-mr-model",
   },
   {
     id: 3,
-    title: "Quantum ML Framework",
-    caption: "Quantum computing meets machine learning",
+    title: "Social Media AI Automation Workflow",
+    caption: "AI-driven social media content generation and post-scheduling through Instagram, Facebook, Tiktok using n8n and DALL-E.",
     description:
       "An experimental framework exploring the intersection of quantum computing and machine learning for solving complex optimization problems.",
     thumbnail: "/projects/quantum.jpg",
-    technologies: ["Python", "Qiskit", "PyTorch", "NumPy"],
+    technologies: ["n8n", "Meta Graph API", "DALL-E", "OpenAI API"],
     link: "#",
     github: "#",
   },
   {
     id: 4,
-    title: "NLP Chatbot Engine",
-    caption: "Context-aware conversational AI system",
+    title: "Filmo AI: Smart Movie & TV Series Search Engine",
+    caption: "AI-powered search engine for searching movies, TV series, docummentation, just from the description or actor/producer involved.",
     description:
       "A sophisticated chatbot engine using transformer models for natural, context-aware conversations with multi-language support.",
     thumbnail: "/projects/chatbot.jpg",
-    technologies: ["Python", "Transformers", "FastAPI", "Redis"],
+    technologies: ["Next.Js", "Gemini API", "Redis", "Supabase"],
     link: "#",
     github: "#",
   },
   {
     id: 5,
-    title: "AutoML Platform",
-    caption: "Automated machine learning pipeline builder",
+    title: "Smart Operation & Finance Manager Chatbot Workflow",
+    caption: "AI assistant for automating operation and finance management tasks such as data entry, record, analytics, through speech recognition in WhatsApp & Telegram.",
     description:
       "A platform that automates the entire ML pipeline from data preprocessing to model deployment, reducing development time by 70%.",
     thumbnail: "/projects/automl.jpg",
-    technologies: ["Python", "Scikit-learn", "Docker", "Kubernetes"],
-    link: "#",
-    github: "#",
+    technologies: ["TTSAPI", "n8n", "Meta Graph API", "Google Cloud API"],
+    link: "https://sevajaya.app.n8n.cloud/workflow/gr2QCSPsKWDAtrXk",
+    github: "https://sevajaya.app.n8n.cloud/workflow/gr2QCSPsKWDAtrXk",
   },
   {
     id: 6,
-    title: "Edge AI Deployment",
-    caption: "ML models optimized for edge devices",
+    title: "Prodigy: SNBT AI Learning Platform",
+    caption: "AI-powered personalized learning platform for SNBT exam preparation with adaptive quizzes, progress tracking, Smart Tutor, and IRT Analysis. All in which deployed microservice on Kubernetes Cluster.",
     description:
       "A toolkit for optimizing and deploying machine learning models on edge devices with minimal latency and resource usage.",
     thumbnail: "/projects/edge-ai.jpg",
-    technologies: ["TensorFlow Lite", "ONNX", "C++", "Rust"],
+    technologies: ["Scikit-learn", "Next.Js", "Redis", "FastAPI", "Docker", "Kubernetes", "FireDB"],
     link: "#",
     github: "#",
   },
@@ -128,12 +129,19 @@ export default function ProjectsSection() {
               <div className="bg-gray-800/30 backdrop-blur-sm border border-gray-700/50 rounded-2xl overflow-hidden hover:border-blue-500/50 transition-all duration-500">
                 {/* Thumbnail */}
                 <div className="relative h-48 overflow-hidden">
-                  <div
-                    className="absolute inset-0 bg-linear-to-br from-blue-600/30 via-purple-600/20 to-cyan-600/30"
-                    style={{
-                      backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%234299e1' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-                    }}
-                  />
+                  {/* Project 1 uses emoji, others use actual images */}
+                  {project.id === 1 ? (
+                    <div className="absolute inset-0 bg-linear-to-br from-blue-600/30 via-purple-600/20 to-cyan-600/30 flex items-center justify-center">
+                      <span className="text-6xl">👁️</span>
+                    </div>
+                  ) : (
+                    <Image
+                      src={`/projectThumbnail/id${project.id}.png`}
+                      alt={project.title}
+                      fill
+                      className="object-cover object-center"
+                    />
+                  )}
                   
                   {/* Animated overlay on hover */}
                   <motion.div
@@ -189,23 +197,6 @@ export default function ProjectsSection() {
                     </div>
                   </motion.div>
 
-                  {/* Project icon/visual */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <motion.div
-                      animate={{
-                        scale: hoveredProject === project.id ? 0.8 : 1,
-                        opacity: hoveredProject === project.id ? 0.3 : 1,
-                      }}
-                      className="text-6xl"
-                    >
-                      {project.id === 1 && "👁️"}
-                      {project.id === 2 && "📊"}
-                      {project.id === 3 && "⚛️"}
-                      {project.id === 4 && "💬"}
-                      {project.id === 5 && "🤖"}
-                      {project.id === 6 && "📱"}
-                    </motion.div>
-                  </div>
                 </div>
 
                 {/* Content */}
